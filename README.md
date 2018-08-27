@@ -9,4 +9,4 @@ The idea behind this project is to compile a collection of Fourier transforms of
 ## Submissions
 Before submitting a picture, make sure you own the rights and want to share the picture with the rest of the world.
 
-Pictures are submitted via the issue tracker. Simply drag and drop the picture into the text field. Please use one of the provided lables to categorize the picture. Add a short description of what your picture is showing and if applicable, if there is a connection or a common teaching goal with another picture in the collection present, please link them together with #<issue number>.
+Pictures are submitted via the issue tracker. Simply drag and drop the picture into the text field. Please use one of the provided lables to categorize the picture. If there is no fitting label, add one or make request for a new one. Also add a short description of what your picture is showing and if applicable, if there is a connection or a common teaching goal with another picture in the collection present, please link them together with #issue-number.
