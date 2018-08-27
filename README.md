@@ -4,5 +4,6 @@ As it was Arkadiy's whish, I have created repository which is now open for submi
 # The Picture Book Of Fourier Transforms
 
 ## The Idea
+The idea behind this project is to compile a collection of Fourier transforms of crystal structures and real life objects to give an easy access to understand (x-ray) scattering features, such as diffuse scattering.
 
 ## Submissions
