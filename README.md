@@ -4,3 +4,5 @@ As it was Arkadiy's whish, I have created repository which is now open for submi
 # The Picture Book Of Fourier Transforms
 
 ## The Idea
+
+## Submissions
