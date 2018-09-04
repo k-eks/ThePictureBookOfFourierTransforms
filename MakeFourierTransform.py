@@ -11,7 +11,6 @@ import numpy as np
 import husl
 import scipy.interpolate
 import scipy.misc
-import scipy.fftpack
 from matplotlib import pyplot
 
 
@@ -127,6 +126,19 @@ def to_black_and_white(image):
         return 0.21 * image[:,:,0] + 0.72 * image[:,:,1] + 0.07 * image[:,:,2]
 
 
+def get_rectangular_section(image):
+    # checking wether image is landscape or portrait
+    if image.shape[0] != image.shape[1]:
+        if image.shape[0] > image.shape[1]:
+            size = image.shape[1]
+        else:
+            size = image.shape[0]
+        # finding the centered position
+        xOffset = image.shape[0] // 2 - size // 2 # floor division
+        yOffset = image.shape[1] // 2 - size // 2 # floor division
+        image = image[xOffset:xOffset+size, yOffset:yOffset+size]
+    return image
+
 def transform_image_from_path(imageFilePath, colorLimit, show=True):
     """
     Makes the Fourier transform of an image from a given file.
@@ -134,11 +146,14 @@ def transform_image_from_path(imageFilePath, colorLimit, show=True):
     show ... bool if true, then the resulting Fourier transform will be displayed using pyplot.
     """
     image = scipy.misc.imread(imageFilePath)
-    image = image[:,:387] # make it square image
-    image_data = to_black_and_white(image) # convert to black and white
+    imageData = to_black_and_white(image) # convert to black and white
+    # check image format
+    if len(imageData.shape) != 2:
+        raise TypeError("The provided image has more or less than two dimensions!")
+    imageData = get_rectangular_section(imageData) # make it square image
 
     # make the Fourier transform
-    FT = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(image_data))) # calculate Fourier transform
+    FT = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(imageData))) # calculate Fourier transform
 
     # draw fourier transform
     if show:
