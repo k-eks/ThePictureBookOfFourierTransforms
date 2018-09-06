@@ -11,6 +11,7 @@ import numpy as np
 import husl
 import scipy.interpolate
 import scipy.misc
+import os.path
 from matplotlib import pyplot
 
 
@@ -49,14 +50,14 @@ def complex_to_color(lookup, a, A):
     return result
 
 
-def rainbow_image(data,colorLimit,color_map_type='light_husl'):
+def rainbow_image(data,colorLimit,colorMapType='light_husl'):
     """
     False-colors a two-dimensional complex array into an image
     where color intensity corresponds to the absolute value of a complex number
     while the color encodes the phase of the complex number
     data ... two dimensional complex array
     colorLimit ... the value at which full color saturation is achieved. Any values above colorLimit will be indestinguishable.
-    color_map_type ... select version of the colormap potions light_husl, dark_husl, light_huslp, dark_huslp.
+    colorMapType ... select version of the colormap potions light_husl, dark_husl, light_huslp, dark_huslp.
     """
 
     data = data / colorLimit
@@ -73,13 +74,13 @@ def rainbow_image(data,colorLimit,color_map_type='light_husl'):
     Al = Al.T
 
     # matching the color scheme
-    if color_map_type == 'light_husl':
+    if colorMapType == 'light_husl':
         lookup = vectorize_husl(husl.husl_to_rgb)(al, Al * 100, 100 - 30 * Al)
-    elif color_map_type == 'dark_husl':
+    elif colorMapType == 'dark_husl':
         lookup = vectorize_husl(husl.husl_to_rgb)(al, Al * 100, 70 * Al)
-    elif color_map_type == 'light_huslp':
+    elif colorMapType == 'light_huslp':
         lookup = vectorize_husl(husl.huslp_to_rgb)(al, Al * 100, 100 - 30 * Al)
-    elif color_map_type == 'dark_huslp':
+    elif colorMapType == 'dark_huslp':
         lookup = vectorize_husl(husl.huslp_to_rgb)(al, Al * 100, 70 * Al)
     else:
         raise("dunno this colormap")
@@ -139,27 +140,37 @@ def get_rectangular_section(image):
         image = image[xOffset:xOffset+size, yOffset:yOffset+size]
     return image
 
-def transform_image_from_path(imageFilePath, colorLimit, show=True):
+def transform_data(inputData, colorLimit, show=True, outputFolder=None, baseName=None, dataColorMap='Greys_r'):
     """
     Makes the Fourier transform of an image from a given file.
-    imageFilePath ... string path to the image location.
     show ... bool if true, then the resulting Fourier transform will be displayed using pyplot.
     """
-    image = scipy.misc.imread(imageFilePath)
-    imageData = to_black_and_white(image) # convert to black and white
-    # check image format
-    if len(imageData.shape) != 2:
-        raise TypeError("The provided image has more or less than two dimensions!")
-    imageData = get_rectangular_section(imageData) # make it square image
+    if type(inputData) == str:
+        image = scipy.misc.imread(inputData)
+        data = to_black_and_white(image) # convert to black and white
+        # check image format
+        if len(data.shape) != 2:
+            raise TypeError("The provided image has more or less than two dimensions!")
+    elif type(inputData) == np.ndarray:
+        data = inputData
+    data = get_rectangular_section(data) # make it square image
 
     # make the Fourier transform
-    FT = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(imageData))) # calculate Fourier transform
+    FT = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(data))) # calculate Fourier transform
+    rainbow = rainbow_image(FT, colorLimit=colorLimit, colorMapType='light_husl')
 
     # draw fourier transform
     if show:
-        rainbow_draw(FT,
-                     colorLimit=colorLimit, # colorLimit gives saturation
-                     color_map_type='light_husl') # There are four possible colormaps: light_husl, dark_husl, light_huslp, dark_huslp
+        pyplot.imshow(rainbow)
+        pyplot.show()
+
+    # write data out
+    if outputFolder != None and baseName != None:
+        if type(inputData) == str:
+            scipy.misc.imsave(os.path.join(outputFolder,baseName + "_col.png"), image)
+        pyplot.imsave(os.path.join(outputFolder,baseName + "_BaW.png"), data, cmap=dataColorMap)
+        scipy.misc.imsave(os.path.join(outputFolder,baseName + "_FTC.png"), rainbow)
+        scipy.misc.imsave(os.path.join(outputFolder,baseName + "_FTA.png"), to_black_and_white(rainbow))
 
 
 #save the original image with its pixels, and not the representation
@@ -168,11 +179,11 @@ def transform_image_from_path(imageFilePath, colorLimit, show=True):
 
 
 
-def rainbow_draw(data, colorLimit, color_map_type='light_husl'):
+def rainbow_draw(data, colorLimit, colorMapType='light_husl'):
     """
     A quick function in order to draw complex arrays
     """
-    RGB = rainbow_image(data, colorLimit, color_map_type)
+    RGB = rainbow_image(data, colorLimit, colorMapType)
     pyplot.imshow(RGB,interpolation='nearest')
     pyplot.xticks([])
     pyplot.yticks([])
